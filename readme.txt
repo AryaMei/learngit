@@ -7,5 +7,8 @@ My stupid boss still prefers SVM
 Creating a new branch is quick and simple
 this is a new text line
 this is stash
+<<<<<<< Updated upstream
 
 this is stash2
+=======
+>>>>>>> Stashed changes
