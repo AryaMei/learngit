@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
                              QLabel, QTableWidget, QTableWidgetItem, QGroupBox, 
                              QLineEdit, QPushButton, QTextEdit, QFormLayout, QCheckBox,
-                              QHeaderView)
+                              QHeaderView, QFrame)
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt
 
@@ -119,22 +119,27 @@ class CompositeDesignApp(QMainWindow):
         self.geometry_layout = QFormLayout()
         
         # 几何参数输入字段
-        self.length_input = QLineEdit()
-        self.width_input = QLineEdit()
-        self.radius_input = QLineEdit()
-        self.thickness_input = QLineEdit()
+        self.length = QLineEdit()
+        self.width = QLineEdit()
+        self.hf_up = QLineEdit()        #上面板厚度
+        self.hf_down = QLineEdit()
+        self.hc = QLineEdit()
         
+        '''
         # 设置默认值
         self.length_input.setText("1000")
         self.width_input.setText("500")
         self.radius_input.setText("0")
         self.thickness_input.setText("2.5")
+        '''
         
         # 添加到表单
-        self.geometry_layout.addRow("长度(mm):", self.length_input)
-        self.geometry_layout.addRow("宽度(mm):", self.width_input)
-        self.geometry_layout.addRow("圆角半径(mm):", self.radius_input)
-        self.geometry_layout.addRow("总厚度(mm):", self.thickness_input)
+        self.geometry_layout.addRow("长度b(mm):", self.length)
+        self.geometry_layout.addRow("宽度a(mm):", self.width)
+        self.geometry_layout.addRow("上面板厚度hf1(mm):", self.hf_up)
+        self.geometry_layout.addRow("下面板厚度hf2(mm):", self.hf_down)
+        self.geometry_layout.addRow("芯层厚度hc(mm):", self.hc)
+        
         
         self.geometry_group.setLayout(self.geometry_layout)
         
@@ -149,12 +154,6 @@ class CompositeDesignApp(QMainWindow):
         self.v12_input = QLineEdit()
         self.density_input = QLineEdit()
         
-        # 设置默认值（示例数据）
-        self.e1_input.setText("135000")
-        self.e2_input.setText("9000")
-        self.g12_input.setText("4500")
-        self.v12_input.setText("0.3")
-        self.density_input.setText("1.6")
         
         # 添加到表单
         self.material_layout.addRow("E1(MPa):", self.e1_input)
@@ -164,52 +163,114 @@ class CompositeDesignApp(QMainWindow):
         self.material_layout.addRow("密度(g/cm³):", self.density_input)
         
         self.material_group.setLayout(self.material_layout)
+
+
+        # 设置区域
+        self.settings_group = QGroupBox("计算设置")
+        self.settings_layout = QFormLayout()
+        self.settings_layout.setVerticalSpacing(10) #增加表单布局之间的行间距
+        
+        # 计算设置选项
+        self.coor_start = QLabel("请输入载荷起始坐标值：")
+        self.coor_start.setStyleSheet("Font: bold")
+        self.coor_end= QLabel("请输入载荷终点坐标值：")
+        self.coor_end.setStyleSheet("Font: bold")
+        self.load_value= QLineEdit()
+        
+        self.settings_layout.addRow(self.coor_start)
+        
+        #设置起始的坐标输入为一列
+        hbox1 = QHBoxLayout()
+        hbox1.addWidget(QLabel("X1:"))
+        self.x1_start = QLineEdit()
+        hbox1.addWidget(self.x1_start)
+        hbox1.addSpacing(10)  # 添加间距
+        hbox1.addWidget(QLabel("Y1:"))
+        self.y1_start = QLineEdit()
+        hbox1.addWidget(self.y1_start)
+        self.settings_layout.addRow(hbox1)
+        
+        #设置载荷输入的终点坐标值的输入框
+        self.settings_layout.addRow(self.coor_end)
+        hbox2 = QHBoxLayout()
+        hbox2.addWidget(QLabel("X2:"))
+        self.x2_start = QLineEdit()
+        hbox2.addWidget(self.x2_start)
+        hbox2.addSpacing(10)  # 添加间距
+        hbox2.addWidget(QLabel("Y2:"))
+        self.y2_start = QLineEdit()
+        hbox2.addWidget(self.y2_start)
+        self.settings_layout.addRow(hbox2)
+        
+        #设置输入均布载荷的值
+        # self.settings_layout.addRow("请输入均布均布载荷值(N/mm2)：",self.load_value)
+        hbox3 = QHBoxLayout()
+        self.load_label = QLabel("请输入均布均布载荷值(N/mm2)：")
+        self.load_label.setStyleSheet("Font: bold")
+        hbox3.addWidget(self.load_label)
+        hbox3.addWidget(self.load_value)
+        self.settings_layout.addRow(hbox3)
+        
+        
+        #添加水平分割线
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Raised)  #Raised是凸起，Sunken是凹陷
+        line.setStyleSheet("background-color: #ccc; height: 5px;")
+        self.settings_layout.addRow(line)
+        
+        #设置计算指定位置挠度的坐标值
+        self.delf_label = QLabel("请输入计算指定位置挠度的坐标值：")
+        self.delf_label.setStyleSheet("Font: bold")
+        self.settings_layout.addRow(self.delf_label)
+        hbox4 = QHBoxLayout()
+        hbox4.addWidget(QLabel("X:"))
+        self.x_position = QLineEdit()
+        hbox4.addWidget(self.x_position)
+        hbox4.addSpacing(10)  # 添加间距
+        hbox4.addWidget(QLabel("Y:"))
+        self.y_position = QLineEdit()
+        hbox4.addWidget(self.y_position)
+        self.settings_layout.addRow(hbox4)
+
+
+        
+        self.settings_group.setLayout(self.settings_layout)        
+
+        
+        #需要计算的操作按钮
+        # 按钮区域
+        self.btn_group = QGroupBox("计算操作")
+        self.btn_layout = QVBoxLayout()
+        
+        self.densityCal_btn = QPushButton("等效密度计算")
+        self.deflection_btn = QPushButton("指定位置挠度计算")
+        self.curveDraw_btn = QPushButton("挠度曲线绘制")
+
+        
+        # 设置按钮样式
+        button_style = "QPushButton {padding: 8px; font-weight: bold;}"
+        self.densityCal_btn.setStyleSheet(button_style + "background-color: #4CAF50; color: white;")
+        self.deflection_btn.setStyleSheet(button_style)
+        self.curveDraw_btn.setStyleSheet(button_style)
+        
+        self.btn_layout.addWidget(self.densityCal_btn)
+        self.btn_layout.addWidget(self.deflection_btn)
+        self.btn_layout.addWidget(self.curveDraw_btn)
+        self.btn_layout.addStretch()
+        
+        self.btn_group.setLayout(self.btn_layout)
         
         # 将几何和材料参数组添加到中间布局
         self.center_layout.addWidget(self.geometry_group)
         self.center_layout.addWidget(self.material_group)
-        self.center_layout.addStretch()  # 添加伸缩项使内容靠上
+        self.center_layout.addWidget(self.settings_group)
+        self.center_layout.addWidget(self.btn_group)
+        # self.center_layout.addStretch()  # 添加伸缩项使内容靠上
     
     def init_right_panel(self):
         """初始化右侧面板"""
-        # 设置区域
-        self.settings_group = QGroupBox("计算设置")
-        self.settings_layout = QFormLayout()
-        
-        # 计算设置选项
-        self.analysis_type = QLineEdit("线性分析")
-        self.mesh_size = QLineEdit("5")
-        self.solver_type = QLineEdit("直接求解器")
-        
-        self.settings_layout.addRow("分析类型:", self.analysis_type)
-        self.settings_layout.addRow("网格尺寸(mm):", self.mesh_size)
-        self.settings_layout.addRow("求解器类型:", self.solver_type)
-        
-        self.settings_group.setLayout(self.settings_layout)
-        
-        # 按钮区域
-        self.btn_group = QGroupBox("操作")
-        self.btn_layout = QVBoxLayout()
-        
-        self.calc_btn = QPushButton("开始计算")
-        self.export_btn = QPushButton("导出结果")
-        self.save_btn = QPushButton("保存设计")
-        self.load_btn = QPushButton("加载设计")
-        
-        # 设置按钮样式
-        button_style = "QPushButton {padding: 8px; font-weight: bold;}"
-        self.calc_btn.setStyleSheet(button_style + "background-color: #4CAF50; color: white;")
-        self.export_btn.setStyleSheet(button_style)
-        self.save_btn.setStyleSheet(button_style)
-        self.load_btn.setStyleSheet(button_style)
-        
-        self.btn_layout.addWidget(self.calc_btn)
-        self.btn_layout.addWidget(self.export_btn)
-        self.btn_layout.addWidget(self.save_btn)
-        self.btn_layout.addWidget(self.load_btn)
-        self.btn_layout.addStretch()
-        
-        self.btn_group.setLayout(self.btn_layout)
+       
         
         # 结果输出区域
         self.output_group = QGroupBox("计算结果")
@@ -230,15 +291,8 @@ class CompositeDesignApp(QMainWindow):
         self.output_group.setLayout(self.output_layout)
         
         # 将设置、按钮和输出添加到右侧布局
-        self.right_layout.addWidget(self.settings_group)
-        self.right_layout.addWidget(self.btn_group)
         self.right_layout.addWidget(self.output_group)
-        
-        # 连接按钮信号
-        self.calc_btn.clicked.connect(self.run_calculation)
-        self.export_btn.clicked.connect(self.export_results)
-        self.save_btn.clicked.connect(self.save_design)
-        self.load_btn.clicked.connect(self.load_design)
+
     
 
     #设置表格合并的函数，并修改其显示的内容,输入的参数为：合并哪一行，显示的文本
@@ -293,3 +347,11 @@ if __name__ == "__main__":
     window = CompositeDesignApp()
     window.show()
     sys.exit(app.exec_())
+    
+    
+'''
+需要解决的问题：
+1. 层合板的材料需要输入什么样的参数（Ex,Ey G ?)
+2. 材料q(x)是否有位置，还是默认是施加在结构的正中心在？
+
+'''
