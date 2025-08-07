@@ -5,6 +5,10 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                               QHeaderView, QFrame)
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
 
 class CompositeDesignApp(QMainWindow):
     def __init__(self):
@@ -33,8 +37,8 @@ class CompositeDesignApp(QMainWindow):
         
         # 将三个区域添加到主布局
         self.main_layout.addWidget(self.left_panel, 40)  # 左侧占40%
-        self.main_layout.addWidget(self.center_panel, 30)  # 中间占30%
-        self.main_layout.addWidget(self.right_panel, 30)  # 右侧占30%
+        self.main_layout.addWidget(self.center_panel, 20)  # 中间占20%
+        self.main_layout.addWidget(self.right_panel, 40)  # 右侧占40%
         
         # 初始化各个区域的UI
         self.init_left_panel()
@@ -143,35 +147,93 @@ class CompositeDesignApp(QMainWindow):
         
         self.geometry_group.setLayout(self.geometry_layout)
         
-        # 下方材料参数区域
+        #--------------------------------------------------------------------------
+        # 中间材料参数区域
         self.material_group = QGroupBox("材料参数")
-        self.material_layout = QFormLayout()
-        
-        # 材料参数输入字段
-        self.e1_input = QLineEdit()
-        self.e2_input = QLineEdit()
-        self.g12_input = QLineEdit()
-        self.v12_input = QLineEdit()
-        self.density_input = QLineEdit()
+        self.material_layout = QFormLayout()        
         
         
-        # 添加到表单
-        self.material_layout.addRow("E1(MPa):", self.e1_input)
-        self.material_layout.addRow("E2(MPa):", self.e2_input)
-        self.material_layout.addRow("G12(MPa):", self.g12_input)
-        self.material_layout.addRow("ν12:", self.v12_input)
-        self.material_layout.addRow("密度(g/cm³):", self.density_input)
+        # 定义等效密度计算所需材料参数
+        self.density_label = QLabel("输入计算等效密度(g/mm³)所需参数：")
+        self.density_label.setStyleSheet("Font: bold")
+        self.material_layout.addRow(self.density_label)
+        self.composite_density = QLineEdit()
+        self.foam_density = QLineEdit()
+        density_hbox = QHBoxLayout()
+        density_hbox.addWidget(QLabel("面板的密度："))
+        density_hbox.addWidget(self.composite_density)
+        density_hbox.addSpacing(10)  # 添加间距
+        density_hbox.addWidget(QLabel("芯材的密度："))
+        density_hbox.addWidget(self.foam_density)
+        self.material_layout.addRow(density_hbox)
+        
+        #添加水平分割线
+        self.add_VLine(self.material_layout)
+        
+        
+        #定义计算层合板弯曲和挠度性能所需材料
+        self.delf_para_label = QLabel("输入计算层合板弯曲挠度所需参数：")
+        self.delf_para_label.setStyleSheet("Font: bold")
+        self.material_layout.addRow(self.delf_para_label)
+        self.composite_E1 = QLineEdit()
+        self.composite_E2 = QLineEdit()
+        self.composite_G = QLineEdit()
+        self.composite_V12 = QLineEdit()
+        self.material_layout.addRow("单层板轴向模量E1(GPa)：",self.composite_E1)
+        self.material_layout.addRow("单层板横向模量E2(GPa)：",self.composite_E2)
+        self.material_layout.addRow("单层板剪切模量G(GPa)：",self.composite_G)
+        self.material_layout.addRow("单层板泊松比V12：",self.composite_V12)
+        
+        '''
+        #这是将参数每一行定义有两个输入参数的代码
+        modulus_hbox = QHBoxLayout()
+        modulus_hbox.addWidget(QLabel("单层板轴向模量E1(GPa)："))
+        modulus_hbox.addWidget(self.composite_E1)
+        modulus_hbox.addSpacing(10)  # 添加间距
+        modulus_hbox.addWidget(QLabel("单层板横向模量E2(GPa)："))
+        modulus_hbox.addWidget(self.composite_E2)
+        self.material_layout.addRow(modulus_hbox)
+        
+        
+
+        modulus_hbox2 = QHBoxLayout()
+        modulus_hbox2.addWidget(QLabel("单层板剪切模量G(GPa)："))
+        modulus_hbox2.addWidget(self.composite_G)
+        modulus_hbox2.addSpacing(10)  # 添加间距
+        modulus_hbox2.addWidget(QLabel("单层板泊松比V12："))
+        modulus_hbox2.addWidget(self.composite_V12)
+        self.material_layout.addRow(modulus_hbox2)
+        
+        #添加水平分割线
+        self.add_VLine(self.material_layout)
+        self.core_E = QLineEdit()
+        self.core_G = QLineEdit()
+        core_hbox = QHBoxLayout()
+        core_hbox.addWidget(QLabel("芯材的杨氏模量Ec(GPa)："))
+        core_hbox.addWidget(self.core_E)
+        core_hbox.addSpacing(10)  # 添加间距
+        core_hbox.addWidget(QLabel("芯材的剪切模量Gc(GPa)："))
+        core_hbox.addWidget(self.core_G)
+        self.material_layout.addRow(core_hbox)
+        '''
+        self.add_VLine(self.material_layout)
+        self.core_E = QLineEdit()
+        self.core_G = QLineEdit()
+        self.material_layout.addRow("芯材的杨氏模量Ec(GPa)：",self.core_E)
+        self.material_layout.addRow("芯材的剪切模量Gc(GPa)：",self.core_G)
+        
         
         self.material_group.setLayout(self.material_layout)
 
 
+        #---------------------------------------------------------------------------------
         # 设置区域
         self.settings_group = QGroupBox("计算设置")
         self.settings_layout = QFormLayout()
         self.settings_layout.setVerticalSpacing(10) #增加表单布局之间的行间距
         
         # 计算设置选项
-        self.coor_start = QLabel("请输入载荷起始坐标值：")
+        self.coor_start = QLabel("请输入载荷加载点坐标值：")
         self.coor_start.setStyleSheet("Font: bold")
         self.coor_end= QLabel("请输入载荷终点坐标值：")
         self.coor_end.setStyleSheet("Font: bold")
@@ -190,6 +252,7 @@ class CompositeDesignApp(QMainWindow):
         hbox1.addWidget(self.y1_start)
         self.settings_layout.addRow(hbox1)
         
+        '''
         #设置载荷输入的终点坐标值的输入框
         self.settings_layout.addRow(self.coor_end)
         hbox2 = QHBoxLayout()
@@ -201,9 +264,10 @@ class CompositeDesignApp(QMainWindow):
         self.y2_start = QLineEdit()
         hbox2.addWidget(self.y2_start)
         self.settings_layout.addRow(hbox2)
+        '''
         
         #设置输入均布载荷的值
-        # self.settings_layout.addRow("请输入均布均布载荷值(N/mm2)：",self.load_value)
+        # self.settings_layout.addRow("请输入集中载荷值(N)：",self.load_value)
         hbox3 = QHBoxLayout()
         self.load_label = QLabel("请输入均布均布载荷值(N/mm2)：")
         self.load_label.setStyleSheet("Font: bold")
@@ -213,11 +277,7 @@ class CompositeDesignApp(QMainWindow):
         
         
         #添加水平分割线
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Raised)  #Raised是凸起，Sunken是凹陷
-        line.setStyleSheet("background-color: #ccc; height: 5px;")
-        self.settings_layout.addRow(line)
+        self.add_VLine(self.settings_layout)
         
         #设置计算指定位置挠度的坐标值
         self.delf_label = QLabel("请输入计算指定位置挠度的坐标值：")
@@ -244,6 +304,7 @@ class CompositeDesignApp(QMainWindow):
         self.btn_layout = QVBoxLayout()
         
         self.densityCal_btn = QPushButton("等效密度计算")
+        self.stiffnessCal_btn = QPushButton("弯曲刚度计算")
         self.deflection_btn = QPushButton("指定位置挠度计算")
         self.curveDraw_btn = QPushButton("挠度曲线绘制")
 
@@ -251,10 +312,12 @@ class CompositeDesignApp(QMainWindow):
         # 设置按钮样式
         button_style = "QPushButton {padding: 8px; font-weight: bold;}"
         self.densityCal_btn.setStyleSheet(button_style + "background-color: #4CAF50; color: white;")
+        self.stiffnessCal_btn.setStyleSheet(button_style)
         self.deflection_btn.setStyleSheet(button_style)
         self.curveDraw_btn.setStyleSheet(button_style)
         
         self.btn_layout.addWidget(self.densityCal_btn)
+        self.btn_layout.addWidget(self.stiffnessCal_btn)        
         self.btn_layout.addWidget(self.deflection_btn)
         self.btn_layout.addWidget(self.curveDraw_btn)
         self.btn_layout.addStretch()
@@ -273,24 +336,37 @@ class CompositeDesignApp(QMainWindow):
        
         
         # 结果输出区域
-        self.output_group = QGroupBox("计算结果")
+        self.output_group = QGroupBox("计算结果显示")
         self.output_layout = QVBoxLayout()
         
-        self.output_text = QTextEdit()
-        self.output_text.setReadOnly(True)
-        self.output_text.setStyleSheet("background-color: #f0f0f0;")
+        self.density_output_text = QTextEdit()
+        self.density_output_text.setReadOnly(True)
+        self.density_output_text.setStyleSheet("background-color: #f0f0f0;")
+        
+        self.stiffness_output_text = QTextEdit()
+        self.stiffness_output_text.setReadOnly(True)
+        self.stiffness_output_text.setStyleSheet("background-color: #f0f0f0;")
         
         # 添加一些示例输出
-        self.output_text.setPlainText("计算结果将显示在这里...\n\n"
+        self.density_output_text.setPlainText("计算结果将显示在这里...\n\n"
                                    "1. 最大应力: \n"
                                    "2. 最大应变: \n"
                                    "3. 安全系数: \n"
                                    "4. 重量估算: ")
+        self.stiffness_output_text.setPlainText("夹层板的弯曲刚度为\n")
         
-        self.output_layout.addWidget(self.output_text)
+        self.output_layout.addWidget(self.density_output_text)
+        self.output_layout.addWidget(self.stiffness_output_text)
         self.output_group.setLayout(self.output_layout)
         
+        
+        #绘制图片
+        self.figure = Figure(figsize = (5,4),dpi=100)
+        self.canvas = FigureCanvas(self.figure)
+        self.output_layout.addWidget(self.canvas)
+        self.plot()
         # 将设置、按钮和输出添加到右侧布局
+        # self.output_layout.setContentsMargins(20, 40, 20, 40)   #定义布局到边缘的距离
         self.right_layout.addWidget(self.output_group)
 
     
@@ -330,17 +406,37 @@ class CompositeDesignApp(QMainWindow):
         self.output_text.append("3. 安全系数: 2.5")
         self.output_text.append("4. 重量估算: 1.2 kg")
     
-    def export_results(self):
-        """导出结果"""
-        self.output_text.append("\n导出功能: 结果已导出到文件")
-    
-    def save_design(self):
-        """保存设计"""
-        self.output_text.append("\n保存功能: 设计已保存")
-    
-    def load_design(self):
-        """加载设计"""
-        self.output_text.append("\n加载功能: 请选择设计文件")
+    def plot(self):
+        # 清除之前的图形
+        self.figure.clear()
+        
+        # 创建坐标轴
+        ax = self.figure.add_subplot(111)
+        
+        # 生成数据
+        x = np.linspace(0, 10, 100)
+        y = np.sin(x)
+        
+        # 绘制曲线
+        ax.plot(x, y, 'b-', linewidth=2)
+        
+        # 设置标题和标签
+        ax.set_title('正弦曲线', fontsize=12)
+        ax.set_xlabel('X轴', fontsize=10)
+        ax.set_ylabel('Y轴', fontsize=10)
+        
+        self.figure.subplots_adjust(left=0.2, right=0.9, bottom=0.2, top=0.9)
+        
+        # 刷新画布
+        self.canvas.draw()
+        
+    def add_VLine(self,layout):
+        #添加水平分割线
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Raised)  #Raised是凸起，Sunken是凹陷
+        line.setStyleSheet("background-color: #ccc; height: 5px;")
+        layout.addRow(line)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
