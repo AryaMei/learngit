@@ -468,51 +468,53 @@
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Mixing ratio</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>100:100 to 100:1*</td>
+          <td>100:10 to 10:100*</td>
+          <td>1:1 to 50:1*</td>
+          <td>1:1 to 20:1*</td>
+          <td>100:5 to 100:100</td>
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Flow rate(ml/min)</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>50 to 4000*</td>
+          <td>100 to 13000*</td>
+          <td>1000 to 400000*</td>
+          <td>161 to 2910</td>
+          <td>2000 to 20000</td>
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Highly abrasive fluids capability</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+          <td>Yes<sup>S</sup></td>
+          <td>No</td>
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Mixing technology</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>Static or Static-Dynamic</td>
+          <td>Static-Dynamic</td>
+          <td>Dynamic</td>
+          <td>Static or Dynamic<sup>$</sub></td>
+          <td>Static or Dynamic<sup>$</sub></td>
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Pump technology</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>Gear</td>
+          <td>Gear</td>
+          <td>Gear</td>
+          <td>Gear,Single acting piston<sup>$</sup></td>
+          <td>Gear</td>
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Wetted parts material</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>Stainless Steel, PTFE</td>
+          <td>Stainless Steel, PTFE</td>
+          <td>Carbon steel, Stainless Steel<sup>$</sup></td>
+          <td>Aluminum, Stainless Steel<sup>$</sup>, Viton, PTFE<sup>$</sup>
+          </td>
+          <td>Aluminum, Stainless Steel<sup>$</sup>, Viton, PTFE<sup>$</sup>
+          </td>
      </tr>
      <tr align="center">
           <td style="font-weight: 800;">Class 1 Div.1 Hazardous locations certified</td>
